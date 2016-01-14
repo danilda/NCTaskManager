@@ -18,13 +18,6 @@ public class InputPanel extends Panel {
     private JRadioButton active = new JRadioButton("Active", true);
     private JRadioButton notActive = new JRadioButton("Not active", false);
     private JButton createBtn;
-    private JSpinner timeSpinner;
-    private JSpinner startSpinner;
-    private JSpinner endSpinner;
-    private JSpinner daySpinner;
-    private JSpinner hourSpinner;
-    private JSpinner minuteSpinner;
-    private JSpinner secondSpinner;
 
 
     public InputPanel() {
@@ -44,33 +37,18 @@ public class InputPanel extends Panel {
         notRepeat.setSelected(true);
         repeat.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
-                if (repeat.isSelected()) {
-                    timeSpinner.setEnabled(false);
-                    startSpinner.setEnabled(true);
-                    endSpinner.setEnabled(true);
-                    daySpinner.setEnabled(true);
-                    hourSpinner.setEnabled(true);
-                    minuteSpinner.setEnabled(true);
-                    secondSpinner.setEnabled(true);
-                } else {
-                    timeSpinner.setEnabled(true);
-                    startSpinner.setEnabled(false);
-                    endSpinner.setEnabled(false);
-                    daySpinner.setEnabled(false);
-                    hourSpinner.setEnabled(false);
-                    minuteSpinner.setEnabled(false);
-                    secondSpinner.setEnabled(false);
-                }
+                boolean isSelected = repeat.isSelected();
+                changeViewOnClick(isSelected);
             }
         });
         createLabel("Time:", new Rectangle(17, 110, 200, 25));
-        timeSpinner = createDateSpinner("yyyy-MM-dd HH:mm:ss", new Rectangle(75, 110, 180, 25));
+        setTimeSpinner(createDateSpinner("yyyy-MM-dd HH:mm:ss", new Rectangle(75, 110, 180, 25)));
         createLabel("Start:", new Rectangle(17, 150, 200, 25));
-        startSpinner = createDateSpinner("yyyy-MM-dd HH:mm:ss", new Rectangle(75, 150, 180, 25));
-        startSpinner.setEnabled(false);
+        setStartSpinner(createDateSpinner("yyyy-MM-dd HH:mm:ss", new Rectangle(75, 150, 180, 25)));
+        getStartSpinner().setEnabled(false);
         createLabel("End:", new Rectangle(17, 190, 200, 25));
-        endSpinner = createDateSpinner("yyyy-MM-dd HH:mm:ss", new Rectangle(75, 190, 180, 25));
-        endSpinner.setEnabled(false);
+        setEndSpinner(createDateSpinner("yyyy-MM-dd HH:mm:ss", new Rectangle(75, 190, 180, 25)));
+        getEndSpinner().setEnabled(false);
         createIntervalPart();
         createLabel("Activity:", new Rectangle(15, 274, 200, 25));
         createRadio(active, group2, new Rectangle(80, 274, 78, 25));
@@ -80,20 +58,19 @@ public class InputPanel extends Panel {
 
     private void createIntervalPart() {
         createLabel("Interval:", new Rectangle(17, 223, 200, 25));
-        daySpinner = createNumberSpinner(new Rectangle(15, 247, 40, 25), 999);
-        daySpinner.setEnabled(false);
+        setDaySpinner(createNumberSpinner(new Rectangle(15, 247, 40, 25), 999));
+        getDaySpinner().setEnabled(false);
         createLabel("d", new Rectangle(57, 247, 80, 25));
-        hourSpinner = createNumberSpinner(new Rectangle(76, 247, 40, 25), 24);
-        hourSpinner.setEnabled(false);
+        setHourSpinner(createNumberSpinner(new Rectangle(76, 247, 40, 25), 24));
+        getHourSpinner().setEnabled(false);
         createLabel("h", new Rectangle(121, 247, 80, 25));
-        minuteSpinner = createNumberSpinner(new Rectangle(136, 247, 40, 25), 60);
-        minuteSpinner.setEnabled(false);
+        setMinuteSpinner(createNumberSpinner(new Rectangle(136, 247, 40, 25), 60));
+        getMinuteSpinner().setEnabled(false);
         createLabel("m", new Rectangle(180, 247, 80, 25));
-        secondSpinner = createNumberSpinner(new Rectangle(200, 247, 40, 25), 60);
-        secondSpinner.setEnabled(false);
+        setSecondSpinner(createNumberSpinner(new Rectangle(200, 247, 40, 25), 60));
+        getSecondSpinner().setEnabled(false);
         createLabel("s", new Rectangle(245, 247, 80, 25));
     }
-
 
     private void createRadio(JRadioButton btn, ButtonGroup group, Rectangle bounds) {
         btn.setBounds(bounds);
@@ -103,40 +80,8 @@ public class InputPanel extends Panel {
         add(btn);
     }
 
-    public JSpinner getSecondSpinner() {
-        return secondSpinner;
-    }
-
-    public JSpinner getMinuteSpinner() {
-        return minuteSpinner;
-    }
-
-    public JSpinner getHourSpinner() {
-        return hourSpinner;
-    }
-
-    public JSpinner getDaySpinner() {
-        return daySpinner;
-    }
-
-    public JSpinner getEndSpinner() {
-        return endSpinner;
-    }
-
-    public JSpinner getStartSpinner() {
-        return startSpinner;
-    }
-
-    public JSpinner getTimeSpinner() {
-        return timeSpinner;
-    }
-
     public JButton getCreateBtn() {
         return createBtn;
-    }
-
-    public JRadioButton getNotActive() {
-        return notActive;
     }
 
     public JRadioButton getActive() {
@@ -149,14 +94,6 @@ public class InputPanel extends Panel {
 
     public JRadioButton getRepeat() {
         return repeat;
-    }
-
-    public ButtonGroup getGroup2() {
-        return group2;
-    }
-
-    public ButtonGroup getGroup1() {
-        return group1;
     }
 
     public JTextField getTaskText() {

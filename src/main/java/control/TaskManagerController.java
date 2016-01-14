@@ -1,7 +1,9 @@
 package control;
 
+import model.ArrayTaskList;
 import model.Task;
 import model.TaskManagerModel;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import program.NotificationManager;
 import view.*;
@@ -11,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -40,7 +43,7 @@ public class TaskManagerController {
         tabsPanel = view.getTabsPanel();
         menuPanel = view.getTaskMenu();
         linkMV();
-        view.createAditionalLists(model);
+        createAditionalLists(model);
         createTaskEvent();
         deleteTaskEvent();
         saveChangeEvent();
@@ -65,8 +68,8 @@ public class TaskManagerController {
     protected void refreshMV() throws IOException {
         model.refreshModel();
         linkMV();
-        view.createAditionalLists(model);
-        view.getIncoming(model);
+        createAditionalLists(model);
+        getIncoming();
         view.setDefaultInfo();
         System.gc();
         log.debug("Model and View update.");
@@ -92,7 +95,7 @@ public class TaskManagerController {
                 try {
                     refreshMV();
                 } catch (IOException e1) {
-                    log.warn("Model and View didn't update.");
+                    log.log(Level.WARN, "Model and View didn't update. Exception: ", e1);
                 }
                 view.setDefaultInputData();
                 log.debug("Task: " + task.toString() + " created.");
@@ -103,7 +106,7 @@ public class TaskManagerController {
     private void showIncomingTaskEvent() {
         tabsPanel.getShowIncomingBtn().addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                view.getIncoming(model);
+                getIncoming();
             }
         });
     }
@@ -116,7 +119,7 @@ public class TaskManagerController {
                 try {
                     refreshMV();
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    log.log(Level.WARN, "Model and View didn't update. Exception: ", e1);
                 }
                 log.debug("Task #" + index + " deleted.");
             }
@@ -127,11 +130,11 @@ public class TaskManagerController {
         infoPanel.getApplyBtn().addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int index = tabsPanel.getAllTasks().getSelectedIndex();
-                if (view.changeSelectedItem(model.getSelectedTask(index))) {
+                if (changeSelectedItem(model.getSelectedTask(index))) {
                     try {
                         refreshMV();
                     } catch (IOException e1) {
-                        e1.printStackTrace();
+                        log.log(Level.WARN, "Model and View didn't update. Exception: ", e1);
                     }
                 }
                 log.debug("Task #" + index + " changed after pressing apply-button.");
@@ -144,15 +147,70 @@ public class TaskManagerController {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int index = tabsPanel.getAllTasks().getSelectedIndex();
-                try {
-                    view.selectingListItem(model.getSelectedTask(index));
-                } catch (ArrayIndexOutOfBoundsException e1) {
-                    log.debug("User clicked on empty list.");
+                if (index == -1) {
                     return;
+                } else {
+                    view.selectingListItem(model.getSelectedTask(index));
+                    log.debug("List item #" + index + " chosen and full-info panel-refreshed.");
                 }
-                log.debug("List item #" + index + " chosen and full-info panel-refreshed.");
             }
         });
+    }
+
+    /**
+     * Create aditional lists: today-list, week-list, month-list, tyear-list.
+     * @param model model part of MVC.
+     */
+    private void createAditionalLists(TaskManagerModel model) {
+        Date dt = new Date();
+        Date from = new Date(dt.getYear(), dt.getMonth(), dt.getDate(), 0, 0);
+        Date to = new Date(dt.getYear(), dt.getMonth(), dt.getDate() + 1, 0, 0);
+        model.setTodayList((ArrayTaskList) model.getTaskList().incoming(from, to));
+        tabsPanel.getTodayTasks().setListData(model.convertListToArray(model.getTodayList()));
+        from = new Date(dt.getYear(), dt.getMonth(), dt.getDate() - dt.getDay(), 0, 0);
+        to = new Date(dt.getYear(), dt.getMonth(), dt.getDate() - dt.getDay() + 7, 0, 0);
+        model.setWeekList((ArrayTaskList) model.getTaskList().incoming(from, to));
+        tabsPanel.getWeekTasks().setListData(model.convertListToArray(model.getWeekList()));
+        from = new Date(dt.getYear(), dt.getMonth(), 0, 0, 0);
+        to = new Date(dt.getYear(), dt.getMonth() + 1, 0, 0, 0);
+        model.setMonthList((ArrayTaskList) model.getTaskList().incoming(from, to));
+        tabsPanel.getMonthTasks().setListData(model.convertListToArray(model.getMonthList()));
+        from = new Date(dt.getYear(), 0, 0, 0, 0);
+        to = new Date(dt.getYear() + 1, 0, 0, 0, 0);
+        model.setYearList((ArrayTaskList) model.getTaskList().incoming(from, to));
+        tabsPanel.getYearTasks().setListData(model.convertListToArray(model.getYearList()));
+        log.debug("Additional lists updated.");
+    }
+
+    /*Help-methods*/
+    /**
+     * Make incoming list.
+     */
+    protected void getIncoming() {
+        Date from = (Date) tabsPanel.getFromInput().getValue();
+        Date to = (Date) tabsPanel.getToInput().getValue();
+        if (to.before(from)) {
+            view.getWarningAlert("Illegal dates: to is lover than from!!!", "Date error");
+        }
+        model.setIncomingList((ArrayTaskList) model.getTaskList().incoming(from, to));
+        tabsPanel.getIncomingTasks().setListData(model.convertListToArray(model.getIncomingList()));
+        log.debug("Incoming from: " + from.toString() +
+                ", to: " + to.toString() + " got");
+    }
+
+    /**
+     * Save changing in task after clicking save-button.
+     * @param first changed task.
+     * @return true if manager has changed task, otherwise - return false
+     */
+    private boolean changeSelectedItem(Task first) {
+        Task task = view.changeSelectedItemView();
+        if (task != null) {
+            first = task;
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

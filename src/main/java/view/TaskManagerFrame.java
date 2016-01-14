@@ -84,10 +84,7 @@ public class TaskManagerFrame extends JFrame {
         infoPanel.getStartSpinner().setEnabled(false);
         infoPanel.getEndSpinner().setEnabled(false);
         setDefaultInfoData();
-        infoPanel.getDaySpinner().setEnabled(false);
-        infoPanel.getHourSpinner().setEnabled(false);
-        infoPanel.getMinuteSpinner().setEnabled(false);
-        infoPanel.getSecondSpinner().setEnabled(false);
+        setDefaultInfoInterval(false);
         infoPanel.getApplyBtn().setEnabled(false);
         infoPanel.getDeleteBtn().setEnabled(false);
         infoPanel.getNextTimeLabel().setText("-- / -- / -- --:--");
@@ -104,6 +101,24 @@ public class TaskManagerFrame extends JFrame {
         infoPanel.getHourSpinner().setValue(0);
         infoPanel.getMinuteSpinner().setValue(0);
         infoPanel.getSecondSpinner().setValue(0);
+    }
+
+    /**
+     * Set default info of interval spinners in info-panel
+     * @param isEnabled
+     */
+    protected void setDefaultInfoInterval(boolean isEnabled) {
+        infoPanel.getDaySpinner().setEnabled(isEnabled);
+        infoPanel.getHourSpinner().setEnabled(isEnabled);
+        infoPanel.getMinuteSpinner().setEnabled(isEnabled);
+        infoPanel.getSecondSpinner().setEnabled(isEnabled);
+    }
+
+    protected void setDefaultInfoTimeSpinners(boolean isRepeated) {
+        infoPanel.getRepeatCB().setSelected(isRepeated);
+        infoPanel.getTimeSpinner().setEnabled(!isRepeated);
+        infoPanel.getStartSpinner().setEnabled(isRepeated);
+        infoPanel.getEndSpinner().setEnabled(isRepeated);
     }
 
     /**

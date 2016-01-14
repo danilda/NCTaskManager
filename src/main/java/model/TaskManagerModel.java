@@ -1,6 +1,7 @@
 package model;
 
 import model.exception.InvalidIntervalException;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -37,7 +38,7 @@ public class TaskManagerModel {
         try {
             TaskIO.readText(taskList, dataFile);
         } catch (InvalidIntervalException e) {
-            log.warn(e.toString());
+            log.log(Level.WARN, "Invalid interval. Exception: ", e);
         } finally {
             currentCalendarMap = new TreeMap<Date, Set<Task>>();
             setCurrentCalendarMap();

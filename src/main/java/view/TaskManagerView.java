@@ -1,15 +1,13 @@
 package view;
 
-import model.ArrayTaskList;
 import model.Task;
-import model.TaskManagerModel;
 import model.exception.InvalidIntervalException;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
-
 
 /**
  * Class, that encapsulates view part of Task Manager.
@@ -24,22 +22,6 @@ public class TaskManagerView extends TaskManagerFrame {
     public TaskManagerView() {
         super();
         log.debug("View part created.");
-    }
-
-    /**
-     * Make incoming list.
-     * @param model model part of MVC.
-     */
-    public void getIncoming(TaskManagerModel model) {
-        Date from = (Date) tabsPanel.getFromInput().getValue();
-        Date to = (Date) tabsPanel.getToInput().getValue();
-        if (to.before(from)) {
-            getWarningAlert("Illegal dates: to is lover than from!!!", "Date error");
-        }
-        model.setIncomingList((ArrayTaskList) model.getTaskList().incoming(from, to));
-        tabsPanel.getIncomingTasks().setListData(model.convertListToArray(model.getIncomingList()));
-        log.debug("Incoming from: " + from.toString() +
-                ", to: " + to.toString() + " got");
     }
 
     /**
@@ -61,23 +43,17 @@ public class TaskManagerView extends TaskManagerFrame {
         int interval = 0;
         if (inputPanel.getRepeat().isSelected()) {
             repeated = true;
-            start = (Date) inputPanel.getStartSpinner().getValue();
-            end = (Date) inputPanel.getEndSpinner().getValue();
-            if (start.after(end)) {
-                Date temp = start;
-                start = end;
-                end = temp;
-                inputPanel.getStartSpinner().setValue(start);
-                inputPanel.getEndSpinner().setValue(end);
-                getWarningAlert("Start of task was installed after its finish time. " +
-                                "We changed start and end positions.",
-                                "Time error");
-                return null;
-            }
             interval += (Integer) inputPanel.getSecondSpinner().getValue();
             interval += 60 * (Integer) inputPanel.getMinuteSpinner().getValue();
             interval += 60 * 60 * (Integer) inputPanel.getHourSpinner().getValue();
             interval += 24 * 60 * 60 * (Integer) inputPanel.getDaySpinner().getValue();
+            start = (Date) inputPanel.getStartSpinner().getValue();
+            end = (Date) inputPanel.getEndSpinner().getValue();
+            if (start.after(end)) {
+                getWarningAlert("Start of task was installed after its finish time.",
+                                "Time error");
+                return null;
+            }
         } else {
             time = (Date) inputPanel.getTimeSpinner().getValue();
         }
@@ -87,6 +63,7 @@ public class TaskManagerView extends TaskManagerFrame {
                 task = new Task(title, start, end, interval);
             } catch (InvalidIntervalException e1) {
                 getWarningAlert("Set the correct interval!!!", "Interval error");
+                log.log(Level.WARN, "Did not enter correct interval. Exception: ", e1);
                 return null;
             }
         } else {
@@ -97,38 +74,12 @@ public class TaskManagerView extends TaskManagerFrame {
     }
 
     /**
-     * Create aditional lists: today-list, week-list, month-list, tyear-list.
-     * @param model model part of MVC.
-     */
-    public void createAditionalLists(TaskManagerModel model) {
-        Date dt = new Date();
-        Date from = new Date(dt.getYear(), dt.getMonth(), dt.getDate(), 0, 0);
-        Date to = new Date(dt.getYear(), dt.getMonth(), dt.getDate() + 1, 0, 0);
-        model.setTodayList((ArrayTaskList) model.getTaskList().incoming(from, to));
-        tabsPanel.getTodayTasks().setListData(model.convertListToArray(model.getTodayList()));
-        from = new Date(dt.getYear(), dt.getMonth(), dt.getDate() - dt.getDay(), 0, 0);
-        to = new Date(dt.getYear(), dt.getMonth(), dt.getDate() - dt.getDay() + 7, 0, 0);
-        model.setWeekList((ArrayTaskList) model.getTaskList().incoming(from, to));
-        tabsPanel.getWeekTasks().setListData(model.convertListToArray(model.getWeekList()));
-        from = new Date(dt.getYear(), dt.getMonth(), 0, 0, 0);
-        to = new Date(dt.getYear(), dt.getMonth() + 1, 0, 0, 0);
-        model.setMonthList((ArrayTaskList) model.getTaskList().incoming(from, to));
-        tabsPanel.getMonthTasks().setListData(model.convertListToArray(model.getMonthList()));
-        from = new Date(dt.getYear(), 0, 0, 0, 0);
-        to = new Date(dt.getYear() + 1, 0, 0, 0, 0);
-        model.setYearList((ArrayTaskList) model.getTaskList().incoming(from, to));
-        tabsPanel.getYearTasks().setListData(model.convertListToArray(model.getYearList()));
-        log.debug("Additional lists updated.");
-    }
-
-    /**
-     * Save changing in task after clicking save-button.
-     * @param task changed task.
+     * Save changing in task after clicking save-button in new task instance.
      * @return true if manager has changed task, otherwise - return false
      */
-    public boolean changeSelectedItem(Task task) {
-        task.setTitle(infoPanel.getTaskText().getText());
-        task.setActive(infoPanel.getActivityCB().isSelected());
+    public Task changeSelectedItemView() {
+        Task task;
+        String title = infoPanel.getTaskText().getText();
         Date start, end;
         int interval = 0;
         boolean isRepeated = infoPanel.getRepeatCB().isSelected();
@@ -140,28 +91,23 @@ public class TaskManagerView extends TaskManagerFrame {
             start = (Date)infoPanel.getStartSpinner().getValue();
             end = (Date)infoPanel.getEndSpinner().getValue();
             if (start.after(end)) {
-                Date temp = start;
-                start = end;
-                end = temp;
-                infoPanel.getStartSpinner().setValue(start);
-                infoPanel.getEndSpinner().setValue(end);
-                getWarningAlert("Start of task was installed after its finish time. " +
-                                "We changed our start and end positions.",
+                getWarningAlert("Start of task was installed after its finish time.",
                         "Time error");
                 log.debug("Did not enter correct interval.");
-                return false;
+                return null;
             }
             try {
-                task.setTime(start, end, interval);
+                task = new Task(title, start, end, interval);
             } catch (InvalidIntervalException e1) {
                 getWarningAlert("Set the correct interval !!!", "Interval error");
-                log.warn("Did not enter correct interval in try block!");
-                return false;
+                log.log(Level.WARN, "Did not enter correct interval in try block. Exception: ", e1);
+                return null;
             }
         } else {
-            task.setTime((Date)infoPanel.getTimeSpinner().getValue());
+            task = new Task(title,(Date)infoPanel.getTimeSpinner().getValue());
         }
-        return true;
+        task.setActive(infoPanel.getActivityCB().isSelected());
+        return task;
     }
 
     /**
@@ -181,16 +127,10 @@ public class TaskManagerView extends TaskManagerFrame {
         infoPanel.getRepeatCB().setEnabled(true);
         if (task.isRepeated()) {
             int temp = task.getRepeatInterval();
-            infoPanel.getRepeatCB().setSelected(true);
-            infoPanel.getTimeSpinner().setEnabled(false);
-            infoPanel.getStartSpinner().setEnabled(true);
+            setDefaultInfoTimeSpinners(true);
             infoPanel.getStartSpinner().setValue(task.getStartTime());
-            infoPanel.getEndSpinner().setEnabled(true);
             infoPanel.getEndSpinner().setValue(task.getEndTime());
-            infoPanel.getDaySpinner().setEnabled(true);
-            infoPanel.getHourSpinner().setEnabled(true);
-            infoPanel.getMinuteSpinner().setEnabled(true);
-            infoPanel.getSecondSpinner().setEnabled(true);
+            setDefaultInfoInterval(true);
             infoPanel.getSecondSpinner().setValue(temp % 60);
             temp /= 60;
             infoPanel.getMinuteSpinner().setValue(temp % 60);
@@ -199,15 +139,9 @@ public class TaskManagerView extends TaskManagerFrame {
             temp /= 24;
             infoPanel.getDaySpinner().setValue(temp);
         } else {
-            infoPanel.getRepeatCB().setSelected(false);
-            infoPanel.getTimeSpinner().setEnabled(true);
-            infoPanel.getStartSpinner().setEnabled(false);
-            infoPanel.getEndSpinner().setEnabled(false);
+            setDefaultInfoTimeSpinners(false);
             infoPanel.getTimeSpinner().setValue(task.getTime());
-            infoPanel.getDaySpinner().setEnabled(false);
-            infoPanel.getHourSpinner().setEnabled(false);
-            infoPanel.getMinuteSpinner().setEnabled(false);
-            infoPanel.getSecondSpinner().setEnabled(false);
+            setDefaultInfoInterval(false);
         }
         infoPanel.getApplyBtn().setEnabled(true);
         infoPanel.getDeleteBtn().setEnabled(true);
@@ -219,5 +153,4 @@ public class TaskManagerView extends TaskManagerFrame {
             infoPanel.getNextTimeLabel().setText("-- / -- / -- --:--");
         }
     }
-
 }

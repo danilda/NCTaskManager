@@ -13,6 +13,7 @@ import java.io.IOException;
  */
 public class TaskManager {
     private static Logger log = Logger.getLogger(TaskManager.class.getName());
+
     /**
      * Launching the application.
      * @param args

@@ -2,6 +2,7 @@ package control;
 
 import model.ArrayTaskList;
 import model.TaskManagerModel;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import view.TaskManagerView;
 import view.TaskMenu;
@@ -58,9 +59,9 @@ public class MenuController {
                 try {
                     controller.refreshMV();
                 } catch (IOException e1) {
-                    log.warn("Model and View didn't update.");
+                    log.log(Level.WARN, "Model and View didn't update. Exception: ", e1);
                 }
-                view.getIncoming(model);
+                controller.getIncoming();
                 log.debug("All tasks was deleted.");
             }
         });

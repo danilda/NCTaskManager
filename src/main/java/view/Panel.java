@@ -13,6 +13,13 @@ import java.util.Date;
 public abstract class Panel extends JPanel {
     protected Color background = new Color(211,211,211);
     protected Font font = new Font("Arial", Font.BOLD, 16);
+    private JSpinner timeSpinner;
+    private JSpinner startSpinner;
+    private JSpinner endSpinner;
+    private JSpinner daySpinner;
+    private JSpinner hourSpinner;
+    private JSpinner minuteSpinner;
+    private JSpinner secondSpinner;
 
     /**
      * Create panel.
@@ -101,5 +108,81 @@ public abstract class Panel extends JPanel {
         add(jSpinner);
         jSpinner.setVisible(true);
         return jSpinner;
+    }
+
+    protected void changeViewOnClick(boolean isSelected) {
+        if (isSelected) {
+            getTimeSpinner().setEnabled(false);
+            getStartSpinner().setEnabled(true);
+            getEndSpinner().setEnabled(true);
+            getDaySpinner().setEnabled(true);
+            getHourSpinner().setEnabled(true);
+            getMinuteSpinner().setEnabled(true);
+            getSecondSpinner().setEnabled(true);
+        } else {
+            getTimeSpinner().setEnabled(true);
+            getStartSpinner().setEnabled(false);
+            getEndSpinner().setEnabled(false);
+            getDaySpinner().setEnabled(false);
+            getHourSpinner().setEnabled(false);
+            getMinuteSpinner().setEnabled(false);
+            getSecondSpinner().setEnabled(false);
+        }
+    }
+
+    public JSpinner getSecondSpinner() {
+        return secondSpinner;
+    }
+
+    public JSpinner getMinuteSpinner() {
+        return minuteSpinner;
+    }
+
+    public JSpinner getHourSpinner() {
+        return hourSpinner;
+    }
+
+    public JSpinner getDaySpinner() {
+        return daySpinner;
+    }
+
+    public JSpinner getStartSpinner() {
+        return startSpinner;
+    }
+
+    public JSpinner getEndSpinner() {
+        return endSpinner;
+    }
+
+    public JSpinner getTimeSpinner() {
+        return timeSpinner;
+    }
+
+    public void setTimeSpinner(JSpinner timeSpinner) {
+        this.timeSpinner = timeSpinner;
+    }
+
+    public void setStartSpinner(JSpinner startSpinner) {
+        this.startSpinner = startSpinner;
+    }
+
+    public void setDaySpinner(JSpinner daySpinner) {
+        this.daySpinner = daySpinner;
+    }
+
+    public void setEndSpinner(JSpinner endSpinner) {
+        this.endSpinner = endSpinner;
+    }
+
+    public void setHourSpinner(JSpinner hourSpinner) {
+        this.hourSpinner = hourSpinner;
+    }
+
+    public void setMinuteSpinner(JSpinner minuteSpinner) {
+        this.minuteSpinner = minuteSpinner;
+    }
+
+    public void setSecondSpinner(JSpinner secondSpinner) {
+        this.secondSpinner = secondSpinner;
     }
 }
